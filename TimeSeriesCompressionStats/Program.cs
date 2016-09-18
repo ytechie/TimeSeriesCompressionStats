@@ -41,6 +41,30 @@ namespace TimeSeriesCompressionStats
             PrintResults(records.Count(), size, originalSize);
 
 
+            Console.WriteLine("-------------------------------");
+            Console.WriteLine("--  Protobuf Encoded Tests   --");
+            Console.WriteLine("-------------------------------");
+
+            records = RandomDatasourceRecordGenerator.GenerateDummyData(1);
+            size = records.ProtobufSerialize().Compress().GetSizeInBytes();
+            PrintResults(records.Count(), size, originalSize);
+
+
+            records = RandomDatasourceRecordGenerator.GenerateDummyData(100);
+            size = records.ProtobufSerialize().Compress().GetSizeInBytes();
+            PrintResults(records.Count(), size, originalSize);
+
+
+            records = RandomDatasourceRecordGenerator.GenerateDummyData(1000);
+            size = records.ProtobufSerialize().Compress().GetSizeInBytes();
+            PrintResults(records.Count(), size, originalSize);
+
+
+            records = RandomDatasourceRecordGenerator.GenerateDummyData(10000);
+            size = records.ProtobufSerialize().Compress().GetSizeInBytes();
+            PrintResults(records.Count(), size, originalSize);
+
+
             Console.Read();
         }
 

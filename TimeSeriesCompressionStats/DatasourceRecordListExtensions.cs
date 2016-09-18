@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using ProtoBuf.Meta;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,7 +19,22 @@ namespace TimeSeriesCompressionStats
 
         public static byte[] ProtobufSerialize(this IEnumerable<DatasourceRecord> records)
         {
-            return null;
+            var serializer = TypeModel.Create();
+            serializer.Add(typeof(List<DatasourceRecord>), true);
+
+            serializer[typeof(DatasourceRecord)]
+                .Add(1, "DatasourceId")
+                .Add(2, "Timestamp")
+                .Add(3, "IntervalSeconds")
+                .Add(4, "Value");
+
+            serializer.CompileInPlace();
+
+            using (var outStream = new MemoryStream())
+            {
+                serializer.Serialize(outStream, records);
+                return outStream.ToArray();
+            }
         }
 
         public static byte[] ToBytes(this string serializedData)
@@ -29,7 +45,7 @@ namespace TimeSeriesCompressionStats
         public static byte[] Compress(this byte[] uncompressedBytes)
         {
             var outputStream = new MemoryStream();
-            using (var gz = new GZipStream(outputStream, CompressionLevel.Fastest, true))
+            using (var gz = new GZipStream(outputStream, CompressionLevel.Optimal, true))
             {
                 gz.Write(uncompressedBytes, 0, uncompressedBytes.Length);
             }
@@ -37,7 +53,7 @@ namespace TimeSeriesCompressionStats
             if (outputStream.CanSeek)
                 outputStream.Position = 0;
 
-            return outputStream.GetBuffer();
+            return outputStream.ToArray();
         }
 
         public static int GetSizeInBytes(this byte[] bytes)
